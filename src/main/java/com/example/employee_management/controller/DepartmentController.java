@@ -14,6 +14,7 @@ public class DepartmentController {
 
     private final DepartmentRepo departmentRepository;
 
+
     public DepartmentController(DepartmentRepo departmentRepository) {
         this.departmentRepository = departmentRepository;
     }
@@ -26,6 +27,32 @@ public class DepartmentController {
     @PostMapping
     public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
         return ResponseEntity.ok(departmentRepository.save(department));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Department> updateDepartment(@PathVariable Long id, @RequestBody Department updatedDepartment) {
+        try {
+            return departmentRepository.findById(id).map(department -> {
+                department.setName(updatedDepartment.getName());
+                return ResponseEntity.ok(departmentRepository.save(department));
+            }).orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
+        try {
+            if (departmentRepository.existsById(id)) {
+                departmentRepository.deleteById(id);
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 
 }
